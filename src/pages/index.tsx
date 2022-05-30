@@ -1,11 +1,13 @@
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import Header from '../components/Header';
 
 import { getPrismicClient } from '../services/prismic';
+import { RichText } from 'prismic-dom';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import Link from 'next/link';
+import { FiCalendar, FiUser } from "react-icons/fi";
 
 interface Post {
   uid?: string;
@@ -27,23 +29,59 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
-  // TODO
+  console.log(postsPagination.results);
   return (
     <>
-    <Head>
+      <Head>
         <title>Início | spacetraveling</title>
-    </Head>
-      <main>
-        <Header />
-
+      </Head>
+      <main className={styles.container}>
+        {postsPagination.results.map(post => (
+          <Link href={`/post/${post.uid}`} key={post.uid}>
+            <a className={styles.content}>
+              <h1>{post.data.title}</h1>
+              <h2>{post.data.subtitle}</h2>
+              <div>
+                <time><FiCalendar size={20} /> {post.first_publication_date}</time>
+                <p><FiUser size={20} /> {post.data.author}</p>
+              </div>
+            </a>
+          </Link>
+        ))}
+        <p className={styles.loadMore} onClick={() => console.log('click')}>
+          Carregar mais posts
+        </p>
       </main>
     </>
   );
 }
 
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient({});
-//   // const postsResponse = await prismic.getByType(TODO);
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient({});
+  const postsResponse = await prismic.getByType('posts');
+  const postData = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date:
+        new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }) || null,
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
 
-//   // TODO
-// };
+  const data = {
+    next_page: postsResponse.next_page,
+    results: postData,
+  };
+
+  return {
+    props: { postsPagination: data },
+  };
+};

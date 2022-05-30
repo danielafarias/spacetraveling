@@ -1,1 +1,73 @@
-// TODO
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  margin: 0 23.25rem 0;
+  transition: color 0.2s;
+
+  h1 {
+    color: var(--heading);
+    font-weight: 700;
+    line-height: 2.118125rem;
+    font-size: 1.75rem;
+    text-align: justify;
+  }
+
+  h2 {
+    color: var(--body);
+    font-weight: 400;
+    font-size: 1.125rem;
+    line-height: 1.36125rem;
+    text-align: justify;
+    padding: 0.5rem 0 1.5rem;
+  }
+
+  div {
+    display: flex;
+
+    time,
+    p {
+      color: var(--info);
+      display: flex;
+      align-items: center;
+
+      & + p {
+        padding-left: 1.5rem;
+      }
+
+      svg {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  &:hover {
+    h1 {
+      color: var(--highlight);
+    }
+  }
+
+  & + a {
+    margin-top: 3rem;
+  }
+}
+
+.loadMore {
+  background-color: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.36125rem;
+  align-items: justify;
+  color: var(--highlight);
+  margin: 4rem 23.25rem 0;
+  cursor: pointer;
+
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(70%);
+  }
+}
