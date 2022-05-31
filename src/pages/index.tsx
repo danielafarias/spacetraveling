@@ -28,7 +28,6 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
-  console.log(postsPagination.results);
   return (
     <>
       <Head>
