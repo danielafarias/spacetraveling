@@ -2,7 +2,6 @@ import { GetStaticProps } from 'next';
 import Head from 'next/head';
 
 import { getPrismicClient } from '../services/prismic';
-import { RichText } from 'prismic-dom';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
@@ -35,13 +34,13 @@ export default function Home({ postsPagination }: HomeProps) {
       <Head>
         <title>Início | spacetraveling</title>
       </Head>
-      <main className={styles.container}>
+      <main className={commonStyles.container}>
         {postsPagination.results.map(post => (
           <Link href={`/post/${post.uid}`} key={post.uid}>
             <a className={styles.content}>
               <h1>{post.data.title}</h1>
               <h2>{post.data.subtitle}</h2>
-              <div>
+              <div className={commonStyles.info}>
                 <time><FiCalendar size={20} /> {post.first_publication_date}</time>
                 <p><FiUser size={20} /> {post.data.author}</p>
               </div>

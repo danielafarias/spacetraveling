@@ -1,1 +1,35 @@
-// TODO
+.title {
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 3.625rem;
+  color: var(--heading);
+  margin-bottom: 1.5625rem;
+}
+
+.image {
+  margin-bottom: 5rem;
+  width: 100%; height: auto; object-fit: contain;
+}
+
+.content {
+  margin-top: 4rem;
+  margin-bottom: 5rem;
+
+  p,
+  li {
+    margin: 1rem 0 1rem 0;
+    font-size: 1.125rem;
+    text-align: justify;
+    line-height: 1.575rem;
+  }
+
+  a {
+    color: var(--highlight);
+
+    transition: filter 0.2s;
+
+    &:hover {
+      filter: brightness(70%);
+    }
+  }
+}
