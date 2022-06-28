@@ -7,6 +7,9 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Link from 'next/link';
 import { FiCalendar, FiUser } from "react-icons/fi";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useState } from 'react';
 
 interface Post {
   uid?: string;
@@ -28,27 +31,44 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  const [results, setResults] = useState<Post[]>(postsPagination.results);
+ 
+  function handleLoadMore(link: string) {
+    fetch(link).then(response => response.json())
+      .then(data => {
+       data.results.map(data => {
+         setResults([...results, data])
+       })
+      })
+  }
+
   return (
     <>
       <Head>
         <title>Início | spacetraveling</title>
       </Head>
       <main className={commonStyles.container}>
-        {postsPagination.results.map(post => (
+        {results.map(post => (
           <Link href={`/post/${post.uid}`} key={post.uid}>
             <a className={styles.content}>
               <h1>{post.data.title}</h1>
               <h2>{post.data.subtitle}</h2>
               <div className={commonStyles.info}>
-                <time><FiCalendar size={20} /> {post.first_publication_date}</time>
+                <time><FiCalendar size={20} /> {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}</time>
                 <p><FiUser size={20} /> {post.data.author}</p>
               </div>
             </a>
           </Link>
         ))}
-        <p className={styles.loadMore} onClick={() => console.log('click')}>
+        {postsPagination.next_page && <p className={styles.loadMore} onClick={() => handleLoadMore(postsPagination.next_page)}>
           Carregar mais posts
-        </p>
+        </p>}
       </main>
     </>
   );
@@ -56,30 +76,14 @@ export default function Home({ postsPagination }: HomeProps) {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient({});
-  const postsResponse = await prismic.getByType('posts');
-  const postData = postsResponse.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date:
-        new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }) || null,
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
+  const postsResponse = await prismic.getByType('posts', {
+    lang: 'pt-BR',
+    pageSize: 3,
   });
 
-  const data = {
-    next_page: postsResponse.next_page,
-    results: postData,
-  };
+  const postsPagination = {...postsResponse}
 
   return {
-    props: { postsPagination: data },
+    props: { postsPagination: postsPagination },
   };
 };
