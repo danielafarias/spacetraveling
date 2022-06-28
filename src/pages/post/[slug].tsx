@@ -8,21 +8,26 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Head from 'next/head';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Post {
-  first_publication_date: string | null;
+  first_publication_date: string;
+  uid: string;
   data: {
     title: string;
+    subtitle: string;
+    author: string;
     banner: {
       url: string;
     };
-    author: string;
+
     content: {
       heading: string;
       body: {
         text: string;
-      };
-    };
+      }[];
+    }[];
   };
 }
 
@@ -40,7 +45,7 @@ export default function Post({ post }: PostProps) {
       ) : (
         <>
           <Head>
-            <title>{post.data.content.heading} | spacetraveling</title>
+            <title>{post.data.title} | spacetraveling</title>
           </Head>
           <main>
             <div className={styles.banner}>
@@ -50,7 +55,14 @@ export default function Post({ post }: PostProps) {
               <h1 className={styles.title}>{post.data.title}</h1>
               <div className={commonStyles.info}>
                 <p>
-                  <FiCalendar size={20} /> {post.first_publication_date}
+                  <FiCalendar size={20} />{' '}
+                  {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}
                 </p>
                 <p>
                   <FiUser size={20} /> {post.data.author}
@@ -59,12 +71,17 @@ export default function Post({ post }: PostProps) {
                   <FiClock size={20} /> 4 min
                 </p>
               </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: post.data.content.body.text,
-                }}
-                className={styles.content}
-              />
+              {post.data.content.map(content => (
+                <div>
+                  <h2>{content.heading}</h2>
+                  <div
+                    className={styles.content}
+                    dangerouslySetInnerHTML={{
+                      __html: RichText.asHtml(content.body),
+                    }}
+                  />
+                </div>
+              ))}
             </section>
           </main>
         </>
@@ -89,25 +106,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const response = await prismic.getByUID('posts', String(slug), {});
 
   const data = {
-    first_publication_date:
-      new Date(response.first_publication_date).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }) || null,
+    first_publication_date: response.first_publication_date,
+    uid: response.uid,
     data: {
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },
       author: response.data.author,
-
-      content: {
-        heading: response.data.content[0].heading,
-        body: {
-          text: RichText.asHtml(response.data.content[0].body),
-        },
-      },
+      content: response.data.content,
     },
   };
 
